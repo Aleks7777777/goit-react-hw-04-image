@@ -1,5 +1,5 @@
-import Gallery from './AllGallery/Gallery';
+import AllGallery from './AllGallery/Gallery';
 
 export const App = () => {
-	return <Gallery className="App" />;
+	return <AllGallery className="App" />;
 };
