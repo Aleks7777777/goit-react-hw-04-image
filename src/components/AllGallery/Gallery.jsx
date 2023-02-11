@@ -1,11 +1,12 @@
-import getImage from 'components/services/gallary-app';
+import getImage from 'components/AppServices/gallery.app';
 import React, { Component } from 'react';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import Button from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Modal from './Modal/Modal';
 import Searchbar from './Searchbar/Searchbar';
 import Loader from './Loader/Loader';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+
 
 export default class Gallery extends Component {
 	state = {
