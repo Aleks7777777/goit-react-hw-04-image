@@ -1,19 +1,19 @@
-import { UlGalary, LiGalary, ImgGalary } from './ImageGallery.styled';
+import { UlGallery, LiGallery, ImgGallery } from './ImageGallery.styled';
 import PropTypes from 'prop-types';
 
 const ImageGallery = ({ images, onClick }) => {
 	return (
-		<UlGalary className="gallery">
+		<UlGallery className="gallery">
 			{images.map(image => (
-				<LiGalary key={image.id} className="gallery-item">
-					<ImgGalary
+				<LiGallery key={image.id} className="gallery-item">
+					<ImgGallery
 						onClick={() => onClick(image.largeImageURL)}
 						src={image.webformatURL}
 						alt={image.tags}
 					/>
-				</LiGalary>
+				</LiGallery>
 			))}
-		</UlGalary>
+		</UlGallery>
 	);
 };
 
