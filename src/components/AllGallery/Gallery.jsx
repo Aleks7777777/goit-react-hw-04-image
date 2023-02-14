@@ -1,88 +1,68 @@
+import { useEffect, useState } from 'react';
 import getImage from 'components/AppServices/gallery.app';
-import React, { Component } from 'react';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import Button from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Modal from './Modal/Modal';
 import Searchbar from './Searchbar/Searchbar';
 import Loader from './Loader/Loader';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
+export const AllGallery = () => {
+	const [images, setImages] = useState([]);
+	const [query, setQuery] = useState('');
+	const [page, setPage] = useState(1);
+	const [loader, setloader] = useState(false);
+	const [modal, setModal] = useState(false);
+	const [modalImg, setModalImg] = useState('');
 
-export default class Gallery extends Component {
-	state = {
-		images: [],
-		query: '',
-		page: 1,
-		loader: false,
-		modal: false,
-		modalImg: '',
-	};
+	useEffect(() => {
+		if (query === '') {
+			return;
+		}
+		const fetchImages = async () => {
+			setloader(true);
 
-	async componentDidUpdate(prevProps, prevState) {
-		if (
-			prevState.query !== this.state.query ||
-			prevState.page !== this.state.page
-		) {
 			try {
-				const { query, loader, page } = this.state;
-				this.setState({ loader: !loader });
-				await getImage(query, page).then(resp => {
-					if (resp.hits.length) {
-						this.setState(prevState => {
-							return {
-								images: [...prevState.images, ...resp.hits],
-							};
-						});
-					} else {
-						Notify.failure('Error');
-					}
-				});
+				const data = await getImage({ q: query, page });
+				if (!data.totalHits) {
+					Notify.failure('We have nothing for this search');
+				}
+
+				if (data.hits.length) {
+					setImages(prev => [...prev, ...data.hits]);
+				}
 			} catch (error) {
 				console.log(error);
 				Notify.failure('Error');
 			} finally {
-				this.setState({ loader: !this.state.loader });
+				setloader(false);
 			}
-		}
-	}
-	onLoadMoreButton = () => {
-		this.setState(prevState => ({
-			page: prevState.page + 1,
-		}));
+		};
+		fetchImages();
+	}, [query, page]);
+
+	const onLoadMoreButton = () => {
+		setPage(page + 1);
 	};
 
-	handleSearch = e => {
-		e.preventDefault();
-		if (this.state.query === e.target.elements.query.value) {
-			return;
-		}
-		this.setState({
-			query: e.target.elements.query.value,
-			page: 1,
-			images: [],
-		});
+	const handleSearch = e => {
+		setQuery(e);
+		setPage(1);
+		setImages([]);
 	};
 
-	toggleModal = imageURL => {
-		this.setState(({ modal }) => ({
-			modal: !modal,
-			modalImg: imageURL,
-		}));
+	const toggleModal = imageURL => {
+		setModal(!modal);
+		setModalImg(imageURL);
 	};
 
-	render() {
-		return (
-			<>
-				<Searchbar onSubmit={this.handleSearch} />
-				<ImageGallery images={this.state.images} onClick={this.toggleModal} />
-				{this.state.images.length > 0 && (
-					<Button onClick={this.onLoadMoreButton} />
-				)}
-				{this.state.loader && <Loader />}
-				{this.state.modal && (
-					<Modal modalImg={this.state.modalImg} onClose={this.toggleModal} />
-				)}
-			</>
-		);
-	}
-}
+	return (
+		<>
+			<Searchbar onSubmit={handleSearch} />
+			<ImageGallery images={images} onClick={toggleModal} />
+			{images.length > 0 && <Button onClick={onLoadMoreButton} />}
+			{loader && <Loader />}
+			{modal && <Modal modalImg={modalImg} onClose={toggleModal} />}
+		</>
+	);
+};
